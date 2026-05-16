@@ -1,5 +1,8 @@
 # schedule_matcher
 
+링크:
+https://yonookim.github.io/schedule_matcher
+
 스케쥴 조정 툴
 - 2~8 명 사용 가능
 - 가능하지 않은 날을 선택
