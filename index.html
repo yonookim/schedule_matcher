@@ -604,40 +604,80 @@
 </div>
 
 <script>
-  // ===== 저장소 (jsonblob.com - 무설정, 무료) =====
-  const STORAGE_API = "https://jsonblob.com/api/jsonBlob";
+// ===== 저장소 (jsonblob.com + CORS 프록시 fallback) =====
+  const DIRECT_API = "https://jsonblob.com/api/jsonBlob";
+  const STORAGE_BACKENDS = [
+    { name: "direct",     wrap: (u) => u },
+    { name: "corsproxy",  wrap: (u) => "https://corsproxy.io/?" + encodeURIComponent(u) },
+    { name: "allorigins", wrap: (u) => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) }
+  ];
   const LOCAL_PREFIX = "scheduler-v4";
 
-  // jsonblob에 새 데이터 생성 (POST)
+  async function tryBackends(buildUrl, fetchOpts, okStatuses = [200, 201, 204, 404]) {
+    let lastErr;
+    for (const backend of STORAGE_BACKENDS) {
+      try {
+        const url = backend.wrap(buildUrl());
+        const res = await fetch(url, fetchOpts);
+        if (res.ok || okStatuses.includes(res.status)) return res;
+        lastErr = new Error("HTTP " + res.status + " via " + backend.name);
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+    throw lastErr || new Error("all backends failed");
+  }
+
   async function createBlob(data) {
-    const res = await fetch(STORAGE_API, {
+    // 프록시는 Location 헤더를 자주 못 가져오니, 우선 직접 POST 시도
+    const opts = {
       method: "POST",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify(data)
-    });
-    if (!res.ok) throw new Error("blob create failed: " + res.status);
-    // jsonblob은 Location 헤더에 새 blob URL을 반환
+    };
+    // 직접 호출 시도
+    try {
+      const res = await fetch(DIRECT_API, opts);
+      if (res.ok) {
+        const loc = res.headers.get("Location");
+        if (loc) {
+          const parts = loc.split("/");
+          return parts[parts.length - 1];
+        }
+      }
+    } catch (e) { /* fallback below */ }
+    // fallback: 프록시 경유 POST (Location 못 읽으면 응답 body의 id 사용 시도)
+    const res = await tryBackends(() => DIRECT_API, opts, [200, 201]);
     const loc = res.headers.get("Location");
-    if (!loc) throw new Error("no Location header");
-    const parts = loc.split("/");
-    return parts[parts.length - 1]; // blob id
+    if (loc) {
+      const parts = loc.split("/");
+      return parts[parts.length - 1];
+    }
+    // 일부 프록시는 Location 헤더를 숨기므로 랜덤 id 생성해서 PUT으로 저장
+    const newId = "r_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+    await updateBlob(newId, data);
+    return newId;
   }
 
   async function readBlob(id) {
-    const res = await fetch(STORAGE_API + "/" + id, {
-      headers: { "Accept": "application/json" }
-    });
+    const res = await tryBackends(
+      () => DIRECT_API + "/" + id,
+      { headers: { "Accept": "application/json" } }
+    );
     if (res.status === 404) return null;
     if (!res.ok) throw new Error("blob read failed: " + res.status);
     return await res.json();
   }
 
   async function updateBlob(id, data) {
-    const res = await fetch(STORAGE_API + "/" + id, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify(data)
-    });
+    const res = await tryBackends(
+      () => DIRECT_API + "/" + id,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(data)
+      }
+    );
     if (!res.ok) throw new Error("blob update failed: " + res.status);
     return true;
   }
