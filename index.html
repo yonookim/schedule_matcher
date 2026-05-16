@@ -604,81 +604,38 @@
 </div>
 
 <script>
-// ===== 저장소 (jsonblob.com + CORS 프록시 fallback) =====
-  const DIRECT_API = "https://jsonblob.com/api/jsonBlob";
-  const STORAGE_BACKENDS = [
-    { name: "direct",     wrap: (u) => u },
-    { name: "corsproxy",  wrap: (u) => "https://corsproxy.io/?" + encodeURIComponent(u) },
-    { name: "allorigins", wrap: (u) => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) }
-  ];
+// ===== 저장소 (Firebase Realtime Database - REST API) =====
+  const FIREBASE_URL = "YOUR_FIREBASE_URL_HERE"; // 예: https://schedule-matcher-xxxxx-default-rtdb.asia-southeast1.firebasedatabase.app
   const LOCAL_PREFIX = "scheduler-v4";
 
-  async function tryBackends(buildUrl, fetchOpts, okStatuses = [200, 201, 204, 404]) {
-    let lastErr;
-    for (const backend of STORAGE_BACKENDS) {
-      try {
-        const url = backend.wrap(buildUrl());
-        const res = await fetch(url, fetchOpts);
-        if (res.ok || okStatuses.includes(res.status)) return res;
-        lastErr = new Error("HTTP " + res.status + " via " + backend.name);
-      } catch (e) {
-        lastErr = e;
-      }
-    }
-    throw lastErr || new Error("all backends failed");
-  }
-
+  // Firebase는 PUT이 upsert(생성 겸 업데이트)라서 우리가 ID를 직접 정할 수 있음
   async function createBlob(data) {
-    // 프록시는 Location 헤더를 자주 못 가져오니, 우선 직접 POST 시도
-    const opts = {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify(data)
-    };
-    // 직접 호출 시도
-    try {
-      const res = await fetch(DIRECT_API, opts);
-      if (res.ok) {
-        const loc = res.headers.get("Location");
-        if (loc) {
-          const parts = loc.split("/");
-          return parts[parts.length - 1];
-        }
-      }
-    } catch (e) { /* fallback below */ }
-    // fallback: 프록시 경유 POST (Location 못 읽으면 응답 body의 id 사용 시도)
-    const res = await tryBackends(() => DIRECT_API, opts, [200, 201]);
-    const loc = res.headers.get("Location");
-    if (loc) {
-      const parts = loc.split("/");
-      return parts[parts.length - 1];
-    }
-    // 일부 프록시는 Location 헤더를 숨기므로 랜덤 id 생성해서 PUT으로 저장
     const newId = "r_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
-    await updateBlob(newId, data);
+    const res = await fetch(`${FIREBASE_URL}/rooms/${newId}.json`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error("room create failed: " + res.status);
     return newId;
   }
 
   async function readBlob(id) {
-    const res = await tryBackends(
-      () => DIRECT_API + "/" + id,
-      { headers: { "Accept": "application/json" } }
-    );
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error("blob read failed: " + res.status);
-    return await res.json();
+    const res = await fetch(`${FIREBASE_URL}/rooms/${id}.json`);
+    if (!res.ok) throw new Error("room read failed: " + res.status);
+    const data = await res.json();
+    // Firebase는 없는 경로에 대해 null을 반환하므로 그대로 사용 가능
+    if (data === null) return null;
+    return data;
   }
 
   async function updateBlob(id, data) {
-    const res = await tryBackends(
-      () => DIRECT_API + "/" + id,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify(data)
-      }
-    );
-    if (!res.ok) throw new Error("blob update failed: " + res.status);
+    const res = await fetch(`${FIREBASE_URL}/rooms/${id}.json`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error("room update failed: " + res.status);
     return true;
   }
 
