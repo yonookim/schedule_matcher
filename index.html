@@ -1253,34 +1253,28 @@ function createProject() {
         <div class="summary-empty">일정 조율이 필요해 보입니다</div>
       `;
     } else {
-      // 카톡 공유용 텍스트 저장
-      window._kakaoShareText =
+// 후보 복사용 텍스트 저장
+      window._candidateShareText =
         `📅 ${state.room.projectName || "일정 조율"}\n` +
         `모두 가능한 날 후보 (${rangeLabel}):\n` +
-        availableDates.map(d => `• ${d}`).join("\n") +
-        `\n\n👇 투표 부탁드려요!\n(채팅창 + 버튼 → "투표" 만들어서 위 항목들 붙여넣어주세요)`;
-
+        availableDates.map(d => `• ${d}`).join("\n");
       box.innerHTML = `
         <div class="summary-title">🎉 모두 가능한 날</div>
         <div class="summary-empty" style="margin-bottom:8px">${rangeLabel}</div>
         <div class="summary-dates">${availableDates.slice(0, 10).join(", ")}${availableDates.length > 10 ? ` 외 ${availableDates.length-10}일` : ''}</div>
-        <button class="btn btn-primary" style="margin-top:14px" onclick="shareToKakao()">💬 카카오톡 투표용 텍스트 복사하기</button>
+        <button class="btn btn-primary" style="margin-top:14px" onclick="copyCandidates()">📋 가능한 날 후보 복사하기</button>
       `;
     }
   }
 
-  // 카톡으로 공유 (텍스트 복사 + 카톡 앱 열기 시도)
-  function shareToKakao() {
-    const msg = window._kakaoShareText || "";
+// 가능한 날 후보 텍스트 복사
+  function copyCandidates() {
+    const msg = window._candidateShareText || "";
     if (!msg) { alert("아직 공유할 후보가 없어요."); return; }
     navigator.clipboard.writeText(msg).then(() => {
-      alert(`✅ 후보 날짜가 복사됐어요!\n\n다음 순서로 진행하세요:\n1. 카카오톡 채팅방 열기\n2. 입력창에 길게 눌러 "붙여넣기"\n3. 전송 후, + 버튼 → "투표" 선택\n4. 항목으로 위 날짜들 추가\n5. 친구들이 투표하면 끝! 🎉`);
-      // 모바일이면 카톡 앱으로 이동 시도
-      setTimeout(() => {
-        try { window.location.href = "kakaotalk://"; } catch(e) {}
-      }, 800);
+      showToast("후보 날짜가 복사되었어요 ✓");
     }).catch(() => {
-      prompt("아래 내용을 복사해서 카카오톡에 붙여넣으세요:", msg);
+      prompt("아래 내용을 복사해서 사용하세요:", msg);
     });
   }
 
