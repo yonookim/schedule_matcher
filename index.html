@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>아낮밤</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf3 100%);
+    min-height: 100vh;
+    color: #2d3748;
+    padding: 20px;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px 28px;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.06);
+  }
+  h1 {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #1a202c;
+  }
+  .brand-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .project-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #718096;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  .subtitle .accent {
+    color: #e53e3e;
+    font-weight: 800;
+    font-size: 15px;
+  }
+  /* ---------- 연결 상태 (에러일 때만 표시) ---------- */
+  .connection-banner {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 18px;
+    font-weight: 500;
+    display: none;
+  }
+  .connection-banner.error { background: #fee2e2; color: #991b1b; display: block; }
+  /* ---------- 폼 ---------- */
+  .form-group { margin-bottom: 20px; }
+  .form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 8px;
+  }
+  .form-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  .form-input:focus { border-color: #667eea; }
+  .number-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+  }
+  .number-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid #e2e8f0;
+    background: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    color: #4a5568;
+    transition: all 0.15s;
+  }
+  .number-btn:hover:not(:disabled) {
+    background: #f0f4ff;
+    border-color: #667eea;
+    color: #667eea;
+  }
+  .number-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .number-display {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1a202c;
+    min-width: 70px;
+    text-align: center;
+  }
+  .number-unit { font-size: 14px; color: #718096; margin-left: -8px; }
+  /* ---------- 아바타 ---------- */
+  .avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 22px;
+  }
+  .avatar-0 { background: linear-gradient(135deg, #667eea, #764ba2); }
+  .avatar-1 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+  .avatar-2 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+  .avatar-3 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+  .avatar-4 { background: linear-gradient(135deg, #fa709a, #fee140); }
+  .avatar-5 { background: linear-gradient(135deg, #30cfd0, #330867); }
+  .avatar-6 { background: linear-gradient(135deg, #a8edea, #fed6e3); color: #4a5568; }
+  .avatar-7 { background: linear-gradient(135deg, #ff9a9e, #fad0c4); color: #4a5568; }
+  /* ---------- 참여 멤버 ---------- */
+  .members-section {
+    margin-top: 24px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+  }
+  .members-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .members-title { font-size: 13px; font-weight: 600; color: #4a5568; }
+  .members-count {
+    font-size: 11px;
+    color: #718096;
+    font-weight: 600;
+    background: #fff;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+  .members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+  }
+  .member-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .member-chip .avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+    margin: 0;
+    position: relative;
+  }
+  .member-chip.done .avatar::after {
+    content: "✓";
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: #38a169;
+    color: #fff;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+  }
+  .member-chip .member-name {
+    font-size: 12px;
+    color: #4a5568;
+    text-align: center;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .member-chip.me .member-name { color: #667eea; font-weight: 700; }
+  .member-empty {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px dashed #cbd5e0;
+    background: transparent;
+  }
+  /* ---------- 버튼 ---------- */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(102,126,234,0.35);
+  }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary { background: #edf2f7; color: #4a5568; margin-top: 10px; }
+  .btn-secondary:hover { background: #e2e8f0; }
+  .btn-ghost {
+    background: transparent;
+    color: #667eea;
+    font-size: 13px;
+    padding: 8px;
+    margin-top: 10px;
+  }
+  .btn-danger-ghost {
+    background: transparent;
+    color: #e53e3e;
+    font-size: 13px;
+    padding: 8px;
+    margin-top: 4px;
+  }
+  /* ---------- 캘린더 ---------- */
+  .calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .month-nav {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 18px;
+    color: #4a5568;
+  }
+  .month-nav:hover { background: #edf2f7; }
+  .month-title { font-size: 18px; font-weight: 700; }
+  .time-legend {
+    font-size: 11px;
+    color: #4a5568;
+    text-align: center;
+    margin-bottom: 10px;
+    padding: 7px 10px;
+    background: #f8fafc;
+    border-radius: 8px;
+    line-height: 1.5;
+  }
+  .time-legend b { font-weight: 800; color: #1a202c; }
+  .calendar {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+    width: 100%;
+  }
+  .day-label {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #718096;
+    padding: 8px 0;
+    min-width: 0;
+  }
+  .day-label.sun { color: #e53e3e; }
+  .day-label.sat { color: #3182ce; }
+  .day {
+    aspect-ratio: 0.78;
+    display: flex;
+    flex-direction: column;
+    padding: 3px;
+    gap: 2px;
+    border-radius: 10px;
+    background: #fff;
+    position: relative;
+    user-select: none;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .day.empty { background: transparent; }
+  .day.past, .day.out-of-range { background: transparent; }
+  .day-num {
+    font-size: 13px;
+    text-align: center;
+    font-weight: 500;
+    color: #2d3748;
+    padding: 1px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .day.past .day-num,
+  .day.out-of-range .day-num {
+    color: #cbd5e0;
+    cursor: not-allowed;
+  }
+  .day:not(.past):not(.out-of-range) .day-num:hover {
+    background: #e2e8f0;
+  }
+  .day-num.has-any-unavail { color: #c53030; }
+  .day-slots {
+    flex: 1;
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 2px;
+    min-width: 0;
+  }
+  .slot {
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #edf2f7;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.1s;
+    position: relative;
+    min-height: 12px;
+    min-width: 0;
+  }
+  .slot:hover { background: #cbd5e0; }
+  .slot.unavailable {
+    background: #fed7d7;
+    color: #c53030;
+    text-decoration: line-through;
+  }
+  .slot.faded {
+    background: #f1f5f9;
+    color: #cbd5e0;
+  }
+  .slot.available-result {
+    background: #f1f5f9;
+    color: #4a5568;
+  }
+  .slot.highlighted {
+    background: #fde047;
+    color: #713f12;
+  }
+  .slot.past, .slot.out-of-range {
+    background: transparent;
+    color: transparent;
+    cursor: not-allowed;
+    pointer-events: none;
+    border: 1px dashed #edf2f7;
+  }
+  .slot-count {
+    position: absolute;
+    bottom: 0;
+    right: 2px;
+    font-size: 7px;
+    font-weight: 600;
+    color: #c53030;
+  }
+  /* ---------- 기타 ---------- */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 18px;
+    font-size: 12px;
+    color: #4a5568;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-swatch { width: 16px; height: 16px; border-radius: 4px; }
+  .current-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8fafc;
+    padding: 10px 14px;
+    border-radius: 12px;
+    margin-bottom: 18px;
+  }
+  .current-user .avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+    margin: 0;
+  }
+  .current-user-info { flex: 1; font-size: 14px; }
+  .current-user-info b { color: #1a202c; }
+  .current-user-info span { color: #718096; font-size: 12px; display: block; }
+  .summary {
+    background: #fef9c3;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  .summary-title { font-size: 14px; color: #713f12; margin-bottom: 8px; font-weight: 700; }
+  .summary-empty { color: #92400e; font-size: 13px; }
+  /* ---------- 선호 일자 투표 ---------- */
+  .pref-section {
+    margin-top: 20px;
+    margin-bottom: 18px;
+    padding: 18px 14px;
+    background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%);
+    border: 2px solid #fbbf24;
+    border-radius: 14px;
+  }
+  .pref-section-title {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 800;
+    color: #7c2d12;
+    margin-bottom: 4px;
+  }
+  .pref-section-sub {
+    text-align: center;
+    font-size: 12px;
+    color: #92400e;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .pref-status {
+    text-align: center;
+    font-size: 12px;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .pref-list { display: flex; flex-direction: column; gap: 8px; }
+  .pref-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: #fff;
+    border: 2px solid #fed7aa;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    gap: 10px;
+  }
+  .pref-card:hover {
+    background: #fff7ed;
+    border-color: #fbbf24;
+    transform: translateY(-1px);
+  }
+  .pref-card.my-vote {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    box-shadow: 0 2px 8px rgba(245,158,11,0.2);
+  }
+  .pref-card.top-vote {
+    border-color: #d97706;
+    border-width: 3px;
+  }
+  .pref-card-left { flex: 1; min-width: 0; }
+  .pref-card-date {
+    font-size: 16px;
+    font-weight: 800;
+    color: #1a202c;
+  }
+  .pref-card-slots {
+    font-size: 11px;
+    color: #78350f;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .pref-card-right {
+    text-align: right;
+    flex-shrink: 0;
+    max-width: 50%;
+  }
+  .pref-card-count {
+    font-size: 14px;
+    font-weight: 800;
+    color: #c53030;
+  }
+  .pref-card-count.zero {
+    font-size: 11px;
+    font-weight: 500;
+    color: #a0aec0;
+  }
+  .pref-card-voters {
+    font-size: 10px;
+    color: #92400e;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pref-no-profile {
+    margin-top: 10px;
+    padding: 10px;
+    background: #fef3c7;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #92400e;
+    text-align: center;
+  }
+  /* ---------- 기타 ---------- */
+  .hidden { display: none !important; }
+  .room-badge {
+    background: #f0f4ff;
+    border: 1px dashed #c3dafe;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #4a5568;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .full-warning {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    font-size: 14px;
+    color: #4a5568;
+  }
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(45, 55, 72, 0.95);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 24px;
+    font-size: 13px;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+  @media (max-width: 480px) {
+    .container { padding: 24px 14px; }
+    .day-num { font-size: 11px; }
+    .slot { font-size: 8px; min-height: 10px; }
+    .legend { font-size: 11px; }
+    .pref-card-date { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+<div id="loading" class="loading-overlay">⏳ 불러오는 중...</div>
+<div id="toast" class="toast"></div>
+<div class="container">
+  <div id="connection-banner" class="connection-banner"></div>
+
+  <!-- ========== 화면 1: 호스트 설정 ========== -->
+  <div id="screen-host" class="hidden">
+    <h1><span class="brand-tag">아낮밤</span>새 일정 조율 만들기</h1>
+    <p class="subtitle">프로젝트 정보를 입력하세요</p>
+    <div id="room-badge-host" class="room-badge"></div>
+    <div class="form-group">
+      <label class="form-label">프로젝트 이름</label>
+      <input type="text" class="form-input" id="project-name-input" placeholder="예: 면접 스터디 일정 조율" maxlength="40">
+    </div>
+    <div class="form-group">
+      <label class="form-label">참가 가능 인원수 (2~8명)</label>
+      <div class="number-input-wrap">
+        <button class="number-btn" id="member-minus" onclick="changeMaxMembers(-1)">−</button>
+        <div class="number-display"><span id="max-members-display">4</span><span class="number-unit">명</span></div>
+        <button class="number-btn" id="member-plus" onclick="changeMaxMembers(1)">+</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">일정 조율 기간</label>
+      <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px">
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:14px; color:#4a5568">
+          <input type="checkbox" id="range-enabled" onchange="toggleRangeInputs()" style="width:16px; height:16px; cursor:pointer"> 직접 기간 설정하기
+        </label>
+      </div>
+      <div id="range-inputs" style="display:none">
+        <div style="display:flex; gap:8px; align-items:center">
+          <input type="date" class="form-input" id="range-start" style="flex:1">
+          <span style="color:#718096">~</span>
+          <input type="date" class="form-input" id="range-end" style="flex:1">
+        </div>
+      </div>
+      <p id="range-default-hint" style="font-size:12px; color:#a0aec0; margin-top:6px">체크 안 하면 오늘부터 30일이 기본값이에요</p>
+    </div>
+    <button class="btn btn-primary" onclick="createProject()">✨ 만들고 시작하기</button>
+  </div>
+
+  <!-- ========== 화면 2: 참여 ========== -->
+  <div id="screen-join" class="hidden">
+    <div class="project-title" id="project-title-join"></div>
+    <p class="subtitle">본인 프로필을 등록해주세요</p>
+    <div id="room-badge-join" class="room-badge"></div>
+    <div id="full-warning-box"></div>
+    <div class="form-group">
+      <label class="form-label">본인 닉네임 (이름)</label>
+      <input type="text" class="form-input" id="my-name-input" placeholder="입력하세요." maxlength="15">
+    </div>
+    <button class="btn btn-primary" id="join-btn" onclick="joinAsMember()">✏ 프로필 만들고 입장하기</button>
+    <div class="members-section">
+      <div class="members-header">
+        <span class="members-title">📋 참여 중인 멤버</span>
+        <span class="members-count" id="member-count-badge">0/4</span>
+      </div>
+      <div class="members-grid" id="join-members-list"></div>
+    </div>
+    <button class="btn btn-secondary" onclick="refreshAndShowResults()">📊 결과만 보기</button>
+    <button class="btn btn-ghost" onclick="refreshData()">🔄 새로고침</button>
+  </div>
+
+  <!-- ========== 화면 3: 캘린더 ========== -->
+  <div id="screen-calendar" class="hidden">
+    <div class="project-title" id="project-title-cal"></div>
+    <p class="subtitle">참석 <span class="accent">불가능한</span> 시간대를 클릭하세요</p>
+    <div class="current-user" id="current-user-box"></div>
+    <div class="time-legend">
+      <b>아</b> 아침(~12시) · <b>낮</b> 낮(12~18시) · <b>밤</b> 밤(18시~)<br>
+      <span style="color:#718096">날짜 숫자 클릭 = 종일 한번에 토글</span>
+    </div>
+    <div class="calendar-header">
+      <button class="month-nav" onclick="changeMonth(-1)">‹</button>
+      <div class="month-title" id="month-title"></div>
+      <button class="month-nav" onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="calendar" id="calendar"></div>
+    <button class="btn btn-primary" id="submit-btn" onclick="submitAvailability()" style="margin-top:20px">제출하고 결과 보기</button>
+    <button class="btn btn-secondary" onclick="refreshAndShowResults()">📊 결과 보기</button>
+    <button class="btn btn-danger-ghost" onclick="resetCurrentUser()">🗑 본인 선택 초기화</button>
+    <button class="btn btn-ghost" onclick="leaveMyProfile()" style="color:#a0aec0">프로필 변경/탈퇴</button>
+  </div>
+
+  <!-- ========== 화면 4: 결과 ========== -->
+  <div id="screen-result" class="hidden">
+    <div class="project-title" id="project-title-result"></div>
+    <div class="members-section">
+      <div class="members-header">
+        <span class="members-title">📋 참여 현황</span>
+        <span class="members-count" id="result-count-badge">0/4</span>
+      </div>
+      <div class="members-grid" id="result-members-list"></div>
+    </div>
+    <div class="summary" id="summary-box"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#fde047"></div>모두 가능</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#f1f5f9"></div>가능</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#f1f5f9;border:1px solid #cbd5e0"></div><span style="color:#cbd5e0">불가능</span></div>
+    </div>
+    <div class="time-legend">
+      <b>아</b> 아침(~12시) · <b>낮</b> 낮(12~18시) · <b>밤</b> 밤(18시~)
+    </div>
+    <div class="calendar-header">
+      <button class="month-nav" onclick="changeMonth(-1)">‹</button>
+      <div class="month-title" id="result-month-title"></div>
+      <button class="month-nav" onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="calendar" id="result-calendar"></div>
+
+    <!-- 선호 일자 투표 (모두 제출 완료 시에만 표시) -->
+    <div id="pref-section" class="pref-section hidden">
+      <div class="pref-section-title">🗳️ 다음 단계 — 선호 일자 투표</div>
+      <div class="pref-section-sub">전원 가능한 후보 중 본인이 선호하는 날을 골라주세요 (여러 개 가능)</div>
+      <div id="pref-status" class="pref-status"></div>
+      <div id="pref-list" class="pref-list"></div>
+      <div id="pref-no-profile" class="pref-no-profile hidden">
+        💡 투표하려면 먼저 프로필을 등록해주세요
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="back-to-cal-btn" onclick="goToCalendar()" style="margin-top:20px">← 내 캘린더로 돌아가기</button>
+    <button class="btn btn-secondary" onclick="refreshData()">🔄 최신으로 새로고침</button>
+    <button class="btn btn-ghost" onclick="copyRoomLink()">🔗 그룹 링크 복사하기</button>
+  </div>
+</div>
+
+<script>
+  // ===== 저장소 (Firebase Realtime Database - REST API) =====
+  const FIREBASE_URL = "https://schedule-matcher-yn-default-rtdb.asia-southeast1.firebasedatabase.app";
+  const LOCAL_PREFIX = "scheduler-v5";
+
+  // ===== 시간대 상수 =====
+  const SLOTS = ["M", "A", "E"];
+  const SLOT_LABEL = { M: "아", A: "낮", E: "밤" };
+  const SLOT_FULL  = { M: "아침", A: "낮", E: "밤" };
+
+  async function createBlob(data) {
+    const newId = "r_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+    const res = await fetch(`${FIREBASE_URL}/rooms/${newId}.json`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error("room create failed: " + res.status);
+    return newId;
+  }
+  async function readBlob(id) {
+    const res = await fetch(`${FIREBASE_URL}/rooms/${id}.json`);
+    if (!res.ok) throw new Error("room read failed: " + res.status);
+    const data = await res.json();
+    if (data === null) return null;
+    return data;
+  }
+  async function updateBlob(id, data) {
+    const res = await fetch(`${FIREBASE_URL}/rooms/${id}.json`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error("room update failed: " + res.status);
+    return true;
+  }
+
+  // ===== 상태 =====
+  let state = {
+    room: null,
+    myMemberId: null,
+    currentScreen: null,
+    viewYear: new Date().getFullYear(),
+    viewMonth: new Date().getMonth()
+  };
+  let initialDataLoaded = false;
+  let saveTimer = null;
+
+  // ===== 유틸 =====
+  function generateMemberId() {
+    return "m_" + Math.random().toString(36).substr(2, 8) + Date.now().toString(36).substr(-4);
+  }
+  function getMyMemberKey() {
+    return LOCAL_PREFIX + "-myid-" + (window._roomId || "default");
+  }
+  function loadMyMemberId() {
+    state.myMemberId = localStorage.getItem(getMyMemberKey()) || null;
+  }
+  function saveMyMemberId(id) {
+    state.myMemberId = id;
+    if (id) localStorage.setItem(getMyMemberKey(), id);
+    else localStorage.removeItem(getMyMemberKey());
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+  function getInitial(name) { return name ? name.trim().charAt(0) : "?"; }
+  function memberIndex(memberId) {
+    if (!state.room || !state.room.members) return 0;
+    const ids = Object.keys(state.room.members).sort();
+    return Math.max(0, ids.indexOf(memberId)) % 8;
+  }
+  function showToast(msg, duration) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(() => t.classList.remove("show"), duration || 2000);
+  }
+  function setBanner(level, msg) {
+    const b = document.getElementById("connection-banner");
+    if (level === "error") {
+      b.className = "connection-banner error";
+      b.textContent = msg;
+      b.style.display = "block";
+    } else {
+      b.style.display = "none";
+    }
+  }
+
+  // ===== 날짜 헬퍼 =====
+  function ymd(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${dd}`;
+  }
+  function parseYmd(s) {
+    const [y, m, d] = s.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }
+  function dateKey(y, m, d) {
+    return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  }
+  function slotKey(dKey, slot) { return `${dKey}:${slot}`; }
+  function isSlotUnavail(unavailable, dKey, slot) {
+    if (!unavailable) return false;
+    if (unavailable.includes(slotKey(dKey, slot))) return true;
+    if (unavailable.includes(dKey)) return true; // 옛 데이터 호환
+    return false;
+  }
+  function getDateRange() {
+    let rangeStart, rangeEnd;
+    if (state.room && state.room.startDate && state.room.endDate) {
+      rangeStart = parseYmd(state.room.startDate);
+      rangeEnd = parseYmd(state.room.endDate);
+    } else {
+      rangeStart = new Date(); rangeStart.setHours(0,0,0,0);
+      rangeEnd = new Date(rangeStart);
+      rangeEnd.setDate(rangeEnd.getDate() + 29);
+    }
+    rangeStart.setHours(0,0,0,0);
+    rangeEnd.setHours(0,0,0,0);
+    return { rangeStart, rangeEnd };
+  }
+  function migrateRoomData(room) {
+    if (!room || !room.members) return;
+    Object.values(room.members).forEach(m => {
+      if (!m.unavailable || !Array.isArray(m.unavailable)) return;
+      const migrated = [];
+      m.unavailable.forEach(entry => {
+        if (typeof entry !== "string") return;
+        if (entry.includes(":")) migrated.push(entry);
+        else SLOTS.forEach(s => migrated.push(`${entry}:${s}`));
+      });
+      m.unavailable = Array.from(new Set(migrated));
+    });
+  }
+
+  // ===== 후보 / 선호도 계산 =====
+  function getCandidates() {
+    const members = (state.room && state.room.members) || {};
+    const submittedArr = Object.values(members).filter(m => m.submitted);
+    const maxMembers = (state.room && state.room.maxMembers) || 0;
+    if (submittedArr.length === 0 || submittedArr.length < maxMembers) return [];
+    const { rangeStart, rangeEnd } = getDateRange();
+    const days = ["일","월","화","수","목","금","토"];
+    const result = [];
+    for (let d = new Date(rangeStart); d <= rangeEnd; d.setDate(d.getDate() + 1)) {
+      const dKey = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
+      const slotsAvail = [];
+      SLOTS.forEach(slot => {
+        const anyBlocked = submittedArr.some(m => isSlotUnavail(m.unavailable || [], dKey, slot));
+        if (!anyBlocked) slotsAvail.push(slot);
+      });
+      if (slotsAvail.length > 0) {
+        result.push({
+          date: new Date(d),
+          dateKey: dKey,
+          label: `${d.getMonth()+1}/${d.getDate()} (${days[d.getDay()]})`,
+          slots: slotsAvail
+        });
+      }
+    }
+    return result;
+  }
+  function getPreferenceCount(dKey) {
+    const prefs = (state.room && state.room.preferences) || {};
+    let count = 0;
+    Object.values(prefs).forEach(arr => {
+      if ((arr || []).includes(dKey)) count++;
+    });
+    return count;
+  }
+  function getPreferenceVoters(dKey) {
+    const prefs = (state.room && state.room.preferences) || {};
+    const members = (state.room && state.room.members) || {};
+    const names = [];
+    Object.entries(prefs).forEach(([mid, arr]) => {
+      if ((arr || []).includes(dKey)) {
+        names.push(members[mid] ? members[mid].name : "???");
+      }
+    });
+    return names;
+  }
+  function togglePreference(dKey) {
+    if (!state.room) return;
+    if (!state.myMemberId) {
+      alert("프로필을 먼저 등록해주세요.");
+      return;
+    }
+    state.room.preferences = state.room.preferences || {};
+    const arr = state.room.preferences[state.myMemberId] || [];
+    const idx = arr.indexOf(dKey);
+    if (idx >= 0) arr.splice(idx, 1);
+    else arr.push(dKey);
+    state.room.preferences[state.myMemberId] = arr;
+    saveRoom();
+    renderPreferenceSection();
+  }
+
+  // ===== 저장 =====
+  function saveRoom() {
+    if (!state.room || !window._roomId) return;
+    state.room.updatedAt = Date.now();
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async () => {
+      try {
+        await updateBlob(window._roomId, state.room);
+      } catch (e) {
+        console.error(e);
+        setBanner("error", "⚠ 저장 실패 - 인터넷 확인 후 다시 시도해주세요");
+        setTimeout(saveRoom, 3000);
+      }
+    }, 400);
+  }
+
+  // ===== 새로고침 (현재 화면 유지) =====
+  async function refreshData() {
+    if (!window._roomId) return;
+    try {
+      const data = await readBlob(window._roomId);
+      if (data && !data.__empty) {
+        state.room = data;
+        migrateRoomData(state.room);
+      } else if (!data) {
+        setBanner("error", "⚠ 방을 찾을 수 없어요. 만료되었을 수 있습니다.");
+        return;
+      }
+      showToast("불러오기 완료 ✓");
+      const cur = state.currentScreen;
+      if (cur === "result") renderResultScreen();
+      else if (cur === "calendar") renderCalendarScreen();
+      else if (cur === "join") renderJoinScreen();
+      else routeToCorrectScreen();
+    } catch (e) {
+      console.error(e);
+      setBanner("error", "⚠ 불러오기 실패 - 인터넷 확인");
+    }
+  }
+
+  // ===== 라우팅 =====
+  function routeToCorrectScreen() {
+    if (!initialDataLoaded) return;
+    if (!state.room || !state.room.projectName) {
+      showScreen("host");
+      renderHostScreen();
+      return;
+    }
+    loadMyMemberId();
+    if (state.myMemberId && state.room.members && state.room.members[state.myMemberId]) {
+      showScreen("calendar");
+      renderCalendarScreen();
+    } else {
+      showScreen("join");
+      renderJoinScreen();
+    }
+  }
+  function showScreen(name) {
+    state.currentScreen = name;
+    ["host","join","calendar","result"].forEach(s => {
+      document.getElementById("screen-" + s).classList.add("hidden");
+    });
+    document.getElementById("screen-" + name).classList.remove("hidden");
+    window.scrollTo(0, 0);
+  }
+
+  // ===== 화면 1: 호스트 설정 =====
+  let hostMaxMembers = 4;
+  function renderHostScreen() {
+    document.getElementById("max-members-display").textContent = hostMaxMembers;
+    document.getElementById("member-minus").disabled = hostMaxMembers <= 2;
+    document.getElementById("member-plus").disabled = hostMaxMembers >= 8;
+    document.getElementById("room-badge-host").innerHTML =
+      `🏠 그룹 코드: <b style="color:#4c51bf">${window._roomId || "—"}</b><br>
+       <span style="font-size:11px">설정 완료 후 이 페이지 URL을 멤버들에게 공유하세요</span>`;
+  }
+  function changeMaxMembers(delta) {
+    hostMaxMembers = Math.max(2, Math.min(8, hostMaxMembers + delta));
+    renderHostScreen();
+  }
+  function createProject() {
+    const nameEl = document.getElementById("project-name-input");
+    const name = nameEl.value.trim();
+    if (!name) {
+      alert("프로젝트 이름을 입력해주세요.");
+      nameEl.focus();
+      return;
+    }
+    const rangeEnabled = document.getElementById("range-enabled").checked;
+    let startDate, endDate;
+    if (rangeEnabled) {
+      const sVal = document.getElementById("range-start").value;
+      const eVal = document.getElementById("range-end").value;
+      if (!sVal || !eVal) { alert("시작일과 종료일을 모두 선택해주세요."); return; }
+      if (sVal > eVal)    { alert("시작일이 종료일보다 늦을 수 없어요."); return; }
+      startDate = sVal; endDate = eVal;
+    } else {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const end = new Date(today); end.setDate(end.getDate() + 29);
+      startDate = ymd(today); endDate = ymd(end);
+    }
+    state.room = {
+      projectName: name,
+      maxMembers: hostMaxMembers,
+      startDate, endDate,
+      members: {},
+      preferences: {},
+      createdAt: Date.now()
+    };
+    saveRoom();
+    showScreen("join");
+    renderJoinScreen();
+  }
+  function toggleRangeInputs() {
+    const enabled = document.getElementById("range-enabled").checked;
+    document.getElementById("range-inputs").style.display = enabled ? "block" : "none";
+    document.getElementById("range-default-hint").style.display = enabled ? "none" : "block";
+    if (enabled) {
+      const startEl = document.getElementById("range-start");
+      const endEl = document.getElementById("range-end");
+      if (!startEl.value) startEl.value = ymd(new Date());
+      if (!endEl.value) {
+        const end = new Date(); end.setDate(end.getDate() + 29);
+        endEl.value = ymd(end);
+      }
+    }
+  }
+
+  // ===== 화면 2: 참여 =====
+  function renderJoinScreen() {
+    document.getElementById("project-title-join").textContent = "🎯 " + (state.room.projectName || "");
+    document.getElementById("room-badge-join").innerHTML =
+      `🏠 그룹 코드: <b style="color:#4c51bf">${window._roomId || "—"}</b><br>
+       <span style="font-size:11px">이 페이지 URL을 멤버들에게 공유하세요</span>`;
+    const members = state.room.members || {};
+    const memberIds = Object.keys(members);
+    const count = memberIds.length;
+    const max = state.room.maxMembers || 4;
+    document.getElementById("member-count-badge").textContent = `${count}/${max}`;
+    const grid = document.getElementById("join-members-list");
+    grid.innerHTML = "";
+    memberIds.forEach((mid, idx) => {
+      const m = members[mid];
+      const chip = document.createElement("div");
+      chip.className = "member-chip" + (m.submitted ? " done" : "") + (mid === state.myMemberId ? " me" : "");
+      chip.innerHTML = `
+        <div class="avatar avatar-${idx % 8}">${getInitial(m.name)}</div>
+        <div class="member-name">${escapeHtml(m.name)}</div>
+      `;
+      grid.appendChild(chip);
+    });
+    for (let i = count; i < max; i++) {
+      const empty = document.createElement("div");
+      empty.className = "member-chip";
+      empty.innerHTML = `<div class="member-empty"></div><div class="member-name" style="color:#cbd5e0">빈 자리</div>`;
+      grid.appendChild(empty);
+    }
+    const fullBox = document.getElementById("full-warning-box");
+    const joinBtn = document.getElementById("join-btn");
+    const nameInput = document.getElementById("my-name-input");
+    if (count >= max) {
+      fullBox.innerHTML = `<div class="full-warning">⚠ 인원이 모두 찼습니다 (${count}/${max}). 새로 참여할 수 없어요. 결과 보기는 가능합니다.</div>`;
+      joinBtn.disabled = true;
+      nameInput.disabled = true;
+      nameInput.placeholder = "참여 불가";
+    } else {
+      fullBox.innerHTML = "";
+      joinBtn.disabled = false;
+      nameInput.disabled = false;
+      nameInput.placeholder = "예: 김지영";
+    }
+  }
+  async function joinAsMember() {
+    const nameEl = document.getElementById("my-name-input");
+    const name = nameEl.value.trim();
+    if (!name) { alert("닉네임을 입력해주세요."); nameEl.focus(); return; }
+    try {
+      const fresh = await readBlob(window._roomId);
+      if (fresh) { state.room = fresh; migrateRoomData(state.room); }
+    } catch(e) { /* ignore */ }
+    const members = state.room.members || {};
+    const count = Object.keys(members).length;
+    const max = state.room.maxMembers || 4;
+    if (count >= max) {
+      alert(`인원이 모두 찼습니다 (${count}/${max}). 참여할 수 없어요.`);
+      renderJoinScreen();
+      return;
+    }
+    if (Object.values(members).some(m => m.name === name)) {
+      if (!confirm(`"${name}" 이름이 이미 있어요. 그래도 등록할까요?`)) return;
+    }
+    const newId = generateMemberId();
+    state.room.members = state.room.members || {};
+    state.room.members[newId] = {
+      name, unavailable: [], submitted: false, joinedAt: Date.now()
+    };
+    saveMyMemberId(newId);
+    saveRoom();
+    showScreen("calendar");
+    renderCalendarScreen();
+  }
+  function leaveMyProfile() {
+    if (!confirm("이 프로필을 탈퇴하고 다시 등록 화면으로 이동할까요?\n(본인의 선택 데이터가 모두 삭제됩니다)")) return;
+    if (state.myMemberId && state.room && state.room.members) {
+      delete state.room.members[state.myMemberId];
+      // 본인 선호 투표도 삭제
+      if (state.room.preferences) delete state.room.preferences[state.myMemberId];
+      saveRoom();
+    }
+    saveMyMemberId(null);
+    showScreen("join");
+    renderJoinScreen();
+  }
+
+  // ===== 화면 3: 캘린더 =====
+  function renderCalendarScreen() {
+    document.getElementById("project-title-cal").textContent = "🎯 " + state.room.projectName;
+    renderCurrentUser();
+    renderCalendar();
+  }
+  function renderCurrentUser() {
+    const box = document.getElementById("current-user-box");
+    if (!box) return;
+    const me = state.room.members[state.myMemberId];
+    if (!me) return;
+    const count = (me.unavailable || []).length;
+    const idx = memberIndex(state.myMemberId);
+    box.innerHTML = `
+      <div class="avatar avatar-${idx}">${getInitial(me.name)}</div>
+      <div class="current-user-info">
+        <b>${escapeHtml(me.name)}</b>
+        <span>불가능 시간대 ${count}개 선택됨 ${me.submitted ? '· <span style="color:#38a169;font-weight:600">✓ 제출 완료 (수정 가능)</span>' : ''}</span>
+      </div>
+    `;
+    const btn = document.getElementById("submit-btn");
+    if (btn) btn.textContent = me.submitted ? "💾 수정사항 저장하고 결과 보기" : "제출하고 결과 보기";
+  }
+  function changeMonth(delta) {
+    state.viewMonth += delta;
+    if (state.viewMonth < 0) { state.viewMonth = 11; state.viewYear--; }
+    if (state.viewMonth > 11) { state.viewMonth = 0; state.viewYear++; }
+    renderCalendar();
+    renderResultCalendar();
+  }
+  function renderCalendar() {
+    const cal = document.getElementById("calendar");
+    if (!cal) return;
+    document.getElementById("month-title").textContent = `${state.viewYear}년 ${state.viewMonth+1}월`;
+    const today = new Date(); today.setHours(0,0,0,0);
+    const { rangeStart, rangeEnd } = getDateRange();
+    const firstDay = new Date(state.viewYear, state.viewMonth, 1).getDay();
+    const daysInMonth = new Date(state.viewYear, state.viewMonth+1, 0).getDate();
+    cal.innerHTML = "";
+    ["일","월","화","수","목","금","토"].forEach((l, idx) => {
+      const cls = idx === 0 ? "sun" : idx === 6 ? "sat" : "";
+      cal.innerHTML += `<div class="day-label ${cls}">${l}</div>`;
+    });
+    for (let i = 0; i < firstDay; i++) {
+      cal.innerHTML += `<div class="day empty"></div>`;
+    }
+    const me = state.room.members[state.myMemberId];
+    const userUnav = (me && me.unavailable) || [];
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dKey = dateKey(state.viewYear, state.viewMonth, d);
+      const dateObj = new Date(state.viewYear, state.viewMonth, d);
+      const isPast = dateObj < today;
+      const outOfRange = dateObj < rangeStart || dateObj > rangeEnd;
+      const disabled = isPast || outOfRange;
+      const cell = document.createElement("div");
+      cell.className = "day" + (isPast ? " past" : "") + (outOfRange ? " out-of-range" : "");
+      const anyUnav = !disabled && SLOTS.some(s => isSlotUnavail(userUnav, dKey, s));
+      cell.innerHTML = `
+        <div class="day-num${anyUnav ? " has-any-unavail" : ""}">${d}</div>
+        <div class="day-slots"></div>
+      `;
+      const slotsWrap = cell.querySelector(".day-slots");
+      SLOTS.forEach(slot => {
+        const isUnav = isSlotUnavail(userUnav, dKey, slot);
+        let cls = "slot";
+        if (disabled) cls += isPast ? " past" : " out-of-range";
+        else if (isUnav) cls += " unavailable";
+        const slotEl = document.createElement("div");
+        slotEl.className = cls;
+        slotEl.textContent = SLOT_LABEL[slot];
+        if (!disabled) {
+          slotEl.onclick = (e) => {
+            e.stopPropagation();
+            toggleDaySlot(dKey, slot);
+          };
+        }
+        slotsWrap.appendChild(slotEl);
+      });
+      if (!disabled) {
+        cell.querySelector(".day-num").onclick = (e) => {
+          e.stopPropagation();
+          toggleAllSlots(dKey);
+        };
+      }
+      cal.appendChild(cell);
+    }
+  }
+  function toggleDaySlot(dKey, slot) {
+    const me = state.room.members[state.myMemberId];
+    if (!me) return;
+    me.unavailable = me.unavailable || [];
+    if (me.unavailable.includes(dKey)) {
+      me.unavailable = me.unavailable.filter(x => x !== dKey);
+      SLOTS.forEach(s => { if (s !== slot) me.unavailable.push(slotKey(dKey, s)); });
+    } else {
+      const k = slotKey(dKey, slot);
+      const idx = me.unavailable.indexOf(k);
+      if (idx >= 0) me.unavailable.splice(idx, 1);
+      else me.unavailable.push(k);
+    }
+    saveRoom();
+    renderCalendar();
+    renderCurrentUser();
+  }
+  function toggleAllSlots(dKey) {
+    const me = state.room.members[state.myMemberId];
+    if (!me) return;
+    me.unavailable = me.unavailable || [];
+    me.unavailable = me.unavailable.filter(x => x !== dKey);
+    const allUnav = SLOTS.every(s => me.unavailable.includes(slotKey(dKey, s)));
+    if (allUnav) {
+      SLOTS.forEach(s => {
+        const k = slotKey(dKey, s);
+        const i = me.unavailable.indexOf(k);
+        if (i >= 0) me.unavailable.splice(i, 1);
+      });
+    } else {
+      SLOTS.forEach(s => {
+        const k = slotKey(dKey, s);
+        if (!me.unavailable.includes(k)) me.unavailable.push(k);
+      });
+    }
+    saveRoom();
+    renderCalendar();
+    renderCurrentUser();
+  }
+  function resetCurrentUser() {
+    const me = state.room.members[state.myMemberId];
+    if (!me) return;
+    if (!confirm(`${me.name}님의 선택을 모두 지울까요?\n(불가능 시간대 + 제출 상태 초기화)`)) return;
+    me.unavailable = [];
+    me.submitted = false;
+    saveRoom();
+    renderCalendar();
+    renderCurrentUser();
+  }
+  function submitAvailability() {
+    const me = state.room.members[state.myMemberId];
+    if (!me) return;
+    me.submitted = true;
+    saveRoom();
+    showResults();
+  }
+  function goToCalendar() {
+    if (state.myMemberId && state.room && state.room.members && state.room.members[state.myMemberId]) {
+      showScreen("calendar");
+      renderCalendarScreen();
+    } else {
+      showScreen("join");
+      renderJoinScreen();
+    }
+  }
+
+  // ===== 화면 4: 결과 =====
+  async function refreshAndShowResults() {
+    await refreshData();
+    showResults();
+  }
+  function showResults() {
+    showScreen("result");
+    renderResultScreen();
+  }
+  function renderResultScreen() {
+    document.getElementById("project-title-result").textContent = "🎯 " + (state.room ? state.room.projectName : "");
+    const members = (state.room && state.room.members) || {};
+    const memberIds = Object.keys(members);
+    const count = memberIds.length;
+    const max = (state.room && state.room.maxMembers) || 0;
+    document.getElementById("result-count-badge").textContent = `${count}/${max}`;
+    const grid = document.getElementById("result-members-list");
+    grid.innerHTML = "";
+    memberIds.forEach((mid, idx) => {
+      const m = members[mid];
+      const chip = document.createElement("div");
+      chip.className = "member-chip" + (m.submitted ? " done" : "") + (mid === state.myMemberId ? " me" : "");
+      chip.innerHTML = `
+        <div class="avatar avatar-${idx % 8}">${getInitial(m.name)}</div>
+        <div class="member-name">${escapeHtml(m.name)}</div>
+      `;
+      grid.appendChild(chip);
+    });
+    for (let i = count; i < max; i++) {
+      const empty = document.createElement("div");
+      empty.className = "member-chip";
+      empty.innerHTML = `<div class="member-empty"></div><div class="member-name" style="color:#cbd5e0">빈 자리</div>`;
+      grid.appendChild(empty);
+    }
+    document.getElementById("back-to-cal-btn").style.display = state.myMemberId ? "" : "none";
+    renderResultCalendar();
+    renderSummary();
+    renderPreferenceSection();
+  }
+  function renderResultCalendar() {
+    const cal = document.getElementById("result-calendar");
+    if (!cal) return;
+    document.getElementById("result-month-title").textContent = `${state.viewYear}년 ${state.viewMonth+1}월`;
+    const today = new Date(); today.setHours(0,0,0,0);
+    const { rangeStart, rangeEnd } = getDateRange();
+    const firstDay = new Date(state.viewYear, state.viewMonth, 1).getDay();
+    const daysInMonth = new Date(state.viewYear, state.viewMonth+1, 0).getDate();
+    cal.innerHTML = "";
+    ["일","월","화","수","목","금","토"].forEach((l, idx) => {
+      const cls = idx === 0 ? "sun" : idx === 6 ? "sat" : "";
+      cal.innerHTML += `<div class="day-label ${cls}">${l}</div>`;
+    });
+    for (let i = 0; i < firstDay; i++) {
+      cal.innerHTML += `<div class="day empty"></div>`;
+    }
+    const members = (state.room && state.room.members) || {};
+    const memberArr = Object.values(members);
+    const submittedArr = memberArr.filter(m => m.submitted);
+    const maxMembers = (state.room && state.room.maxMembers) || 0;
+    const allSubmitted = submittedArr.length === maxMembers && submittedArr.length > 0;
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dKey = dateKey(state.viewYear, state.viewMonth, d);
+      const dateObj = new Date(state.viewYear, state.viewMonth, d);
+      const isPast = dateObj < today;
+      const outOfRange = dateObj < rangeStart || dateObj > rangeEnd;
+      const disabled = isPast || outOfRange;
+      const cell = document.createElement("div");
+      cell.className = "day" + (isPast ? " past" : "") + (outOfRange ? " out-of-range" : "");
+      const slotsHtml = SLOTS.map(slot => {
+        if (disabled) {
+          return `<div class="slot ${isPast ? "past" : "out-of-range"}"></div>`;
+        }
+        let unavCount = 0;
+        submittedArr.forEach(m => {
+          if (isSlotUnavail(m.unavailable || [], dKey, slot)) unavCount++;
+        });
+        let cls = "slot";
+        if (unavCount > 0) cls += " faded";
+        else if (allSubmitted) cls += " highlighted";
+        else cls += " available-result";
+        const countLabel = unavCount > 0 ? `<span class="slot-count">×${unavCount}</span>` : '';
+        return `<div class="${cls}">${SLOT_LABEL[slot]}${countLabel}</div>`;
+      }).join("");
+      cell.innerHTML = `
+        <div class="day-num">${d}</div>
+        <div class="day-slots">${slotsHtml}</div>
+      `;
+      cal.appendChild(cell);
+    }
+  }
+  function renderSummary() {
+    const box = document.getElementById("summary-box");
+    if (!box) return;
+    const members = (state.room && state.room.members) || {};
+    const memberArr = Object.values(members);
+    const submittedArr = memberArr.filter(m => m.submitted);
+    const maxMembers = (state.room && state.room.maxMembers) || 0;
+    const submittedCount = submittedArr.length;
+    if (submittedCount < maxMembers) {
+      box.innerHTML = `
+        <div class="summary-title">아직 ${maxMembers - submittedCount}명이 제출하지 않았어요</div>
+        <div class="summary-empty">모두 제출하면 가능한 시간대가 노란색으로 표시됩니다</div>
+      `;
+      return;
+    }
+    const candidates = getCandidates();
+    const { rangeStart, rangeEnd } = getDateRange();
+    const fmt = d => `${d.getMonth()+1}월 ${d.getDate()}일`;
+    const rangeLabel = `${fmt(rangeStart)} ~ ${fmt(rangeEnd)}`;
+    if (candidates.length === 0) {
+      box.innerHTML = `
+        <div class="summary-title">${rangeLabel} 중 모두 가능한 시간이 없어요 😢</div>
+        <div class="summary-empty">일정 조율이 필요해 보입니다</div>
+      `;
+      return;
+    }
+    box.innerHTML = `
+      <div class="summary-title">🎉 모두 가능한 시간 ${candidates.length}개 찾았어요!</div>
+      <div class="summary-empty">${rangeLabel} · 아래에서 선호 일자를 골라주세요 ↓</div>
+    `;
+  }
+  function renderPreferenceSection() {
+    const section = document.getElementById("pref-section");
+    const list = document.getElementById("pref-list");
+    const status = document.getElementById("pref-status");
+    const noProfile = document.getElementById("pref-no-profile");
+    if (!section) return;
+
+    const candidates = getCandidates();
+    if (candidates.length === 0) {
+      section.classList.add("hidden");
+      return;
+    }
+    section.classList.remove("hidden");
+
+    const counts = {};
+    candidates.forEach(c => counts[c.dateKey] = getPreferenceCount(c.dateKey));
+    const maxCount = Math.max(0, ...Object.values(counts));
+
+    // 득표순 정렬, 동률은 날짜순
+    const sorted = [...candidates].sort((a, b) => {
+      const ca = counts[a.dateKey] || 0;
+      const cb = counts[b.dateKey] || 0;
+      if (cb !== ca) return cb - ca;
+      return a.dateKey.localeCompare(b.dateKey);
+    });
+
+    const myMid = state.myMemberId;
+    const myPrefs = (state.room.preferences && state.room.preferences[myMid]) || [];
+
+    list.innerHTML = sorted.map(c => {
+      const count = counts[c.dateKey] || 0;
+      const voters = getPreferenceVoters(c.dateKey);
+      const isMyVote = myPrefs.includes(c.dateKey);
+      const isTop = maxCount > 0 && count === maxCount;
+      const slotLabel = c.slots.length === 3 ? "종일" : c.slots.map(s => SLOT_FULL[s]).join("/");
+      const crown = isTop ? ' 👑' : '';
+      const countHtml = count > 0
+        ? `<div class="pref-card-count">${count}표${crown}</div>`
+        : `<div class="pref-card-count zero">아직 0표</div>`;
+      const votersHtml = voters.length > 0
+        ? `<div class="pref-card-voters">${voters.map(escapeHtml).join(", ")}</div>`
+        : '';
+      const onclickAttr = myMid
+        ? `onclick="togglePreference('${c.dateKey}')"`
+        : '';
+      const classes = "pref-card"
+        + (isMyVote ? " my-vote" : "")
+        + (isTop && count > 0 ? " top-vote" : "");
+      return `
+        <div class="${classes}" ${onclickAttr}>
+          <div class="pref-card-left">
+            <div class="pref-card-date">${c.label}</div>
+            <div class="pref-card-slots">${slotLabel}</div>
+          </div>
+          <div class="pref-card-right">
+            ${countHtml}
+            ${votersHtml}
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    if (myMid) {
+      noProfile.classList.add("hidden");
+      const validMyPrefs = myPrefs.filter(d => candidates.some(c => c.dateKey === d));
+      if (validMyPrefs.length === 0) {
+        status.innerHTML = `<span style="color:#92400e">👇 아직 투표하지 않으셨어요. 선호 일자를 골라주세요</span>`;
+      } else {
+        status.innerHTML = `<span style="color:#15803d">✓ ${validMyPrefs.length}개 선택함 · 클릭으로 변경 가능</span>`;
+      }
+    } else {
+      noProfile.classList.remove("hidden");
+      status.innerHTML = "";
+    }
+  }
+
+  // ===== 링크 공유 =====
+  function copyRoomLink() {
+    const url = location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      alert(`🔗 그룹 링크가 복사되었어요!\n\n그룹 코드: ${window._roomId || ""}\n\n카톡/팀즈/인스타 어디든 붙여넣어 공유하세요.\n받은 사람이 링크를 누르면 같은 방에 자동 입장됩니다.`);
+    }).catch(() => {
+      prompt("아래 링크를 복사해서 공유하세요:", url);
+    });
+  }
+
+  // ===== 로컬 모드 / 에러 =====
+  function showLocalModeWarning() {
+    document.getElementById("loading").classList.add("hidden");
+    const container = document.querySelector(".container");
+    container.innerHTML = `
+      <h1>⚠ 호스팅이 필요해요</h1>
+      <p style="text-align:center;color:#718096;margin-bottom:20px;font-size:14px">
+        이 파일은 로컬에서 열려서 클라우드 저장소에 접근할 수 없어요.<br>
+        웹에 호스팅하면 모든 기기에서 자동 동기화됩니다.
+      </p>
+      <div style="background:#f0f4ff;border-radius:10px;padding:14px;font-size:13px;color:#4a5568;line-height:1.6">
+        💡 브라우저 보안 정책상 로컬 파일(<code>file://</code>)에서는 외부 서버 호출이 불가합니다. GitHub Pages나 Netlify에 호스팅 후 사용하세요.
+      </div>
+    `;
+  }
+  function showNetworkError(msg) {
+    document.getElementById("loading").classList.add("hidden");
+    setBanner("error", "⚠ " + msg);
+    const container = document.querySelector(".container");
+    const errBox = document.createElement("div");
+    errBox.style.cssText = "background:#fee2e2;border:1px solid #fca5a5;border-radius:12px;padding:18px;margin-top:16px;font-size:14px;color:#991b1b;line-height:1.7";
+    errBox.innerHTML = `
+      <b>저장소 서버 연결 실패</b><br><br>
+      가능한 원인:<br>
+      • 인터넷 연결이 끊겼거나<br>
+      • Firebase 서버가 일시적으로 다운됐거나<br>
+      • 브라우저 확장 프로그램이 차단 중일 수 있어요<br><br>
+      <button onclick="location.reload()" style="padding:10px 20px;background:#dc2626;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer">🔄 다시 시도</button>
+    `;
+    container.appendChild(errBox);
+  }
+
+  // ===== 시작 =====
+  async function start() {
+    const proto = location.protocol;
+    if (proto !== "http:" && proto !== "https:") {
+      showLocalModeWarning();
+      return;
+    }
+    const params = new URLSearchParams(location.search);
+    let roomId = params.get("room");
+    try {
+      if (!roomId) {
+        const newId = await createBlob({ __empty: true, createdAt: Date.now() });
+        roomId = newId;
+        params.set("room", roomId);
+        history.replaceState(null, "", location.pathname + "?" + params.toString());
+        state.room = null;
+      } else {
+        const data = await readBlob(roomId);
+        if (data && !data.__empty) {
+          state.room = data;
+          migrateRoomData(state.room);
+        } else {
+          state.room = null;
+        }
+      }
+      window._roomId = roomId;
+      initialDataLoaded = true;
+      document.getElementById("loading").classList.add("hidden");
+      routeToCorrectScreen();
+    } catch (e) {
+      console.error("Storage connection failed:", e);
+      showNetworkError("저장소 연결 실패 (" + (e.message || "알 수 없는 오류") + ")");
+    }
+  }
+
+  // 전역 노출
+  window.changeMaxMembers = changeMaxMembers;
+  window.toggleRangeInputs = toggleRangeInputs;
+  window.createProject = createProject;
+  window.joinAsMember = joinAsMember;
+  window.leaveMyProfile = leaveMyProfile;
+  window.changeMonth = changeMonth;
+  window.toggleDaySlot = toggleDaySlot;
+  window.toggleAllSlots = toggleAllSlots;
+  window.resetCurrentUser = resetCurrentUser;
+  window.submitAvailability = submitAvailability;
+  window.showResults = showResults;
+  window.refreshAndShowResults = refreshAndShowResults;
+  window.goToCalendar = goToCalendar;
+  window.copyRoomLink = copyRoomLink;
+  window.refreshData = refreshData;
+  window.togglePreference = togglePreference;
+  start();
+</script>
+</body>
+</html>
